@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="kr">
+	<head>
+	<meta charset="UTF-8">
+	<title>IT 기기 리뷰 게시판</title>
+	<link rel="stylesheet" href="http://localhost:8090/boardPrj/css/stylesheet.css">
+</head>
+<body>
+	<section class="container">
+    	<article class="half">
+	        <h1>Device Review</h1>
+	        <div class="tabs">
+	            <span class="tab signin active"><a href="#signin">로그인</a></span>
+	            <span class="tab signup"><a href="#signup">회원가입</a></span>
+	        </div>
+	        <div class="content">
+	            <div class="signin-cont cont">
+	                <form action="http://localhost:8090/boardPrj/login/loginAction.jsp" method="post">
+	                    <label for="id">Your id</label>
+		                    <input type="text" name="id" id="id" class="inpt" required="required" placeholder="아이디를 입력해주세요.">
+       					<label for="password">Your password</label>
+	                    	<input type="password" name="password" id="password" class="inpt" required="required" placeholder="비밀번호를 입력해주세요.">
+	                    <div class="submit-wrap">
+		                	<input type="submit" value="Sign in" class="submit">
+	                    </div>
+   					 </form>
+				</div>
+    			<div class="signup-cont cont">
+                	<form action="http://localhost:8090/boardPrj/join/joinAction.jsp" method="post" class="joinForm">
+	                    <label for="name">Your name</label>
+		                    <input type="text" name="name" id="name" class="inpt joinname" required="required" placeholder="이름">
+	                    <label for="id">Your iD</label>
+                    		<input type="text" name="id" id="id" class="inpt joinid" required="required" placeholder="아이디">
+                    		<input type="hidden" name="validationResult" id="validationResult"/> 
+         				<label for="password">Your password</label>
+	                    	<input type="password" name="password" id="password" class="inpt joinpassword" required="required" placeholder="비밀번호">
+	                    <div>
+		                	<input type="button" name="validation" id ="validation" value="아이디 중복 검사" class="submit">
+	                    </div>
+	                    <div class="submit-wrap">
+		                	<input type="button" value="Sign up" class="submit joinsubmit">
+	                    </div>
+     				</form>
+           		</div>
+	        </div>
+		</article>
+		<div class="half bg"></div>
+	</section>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+			<script type="text/javascript">
+			
+			const EXISTID = 1;
+			const AVAILABLEID = -1;
+			
+			$('.tabs .tab').click(function(){
+			    if ($(this).hasClass('signin')) {
+			        $('.tabs .tab').removeClass('active');
+			        $(this).addClass('active');
+			        $('.cont').hide();
+			        $('.signin-cont').show();
+			    } 
+			    if ($(this).hasClass('signup')) {
+			        $('.tabs .tab').removeClass('active');
+			        $(this).addClass('active');
+			        $('.cont').hide();
+			        $('.signup-cont').show();
+			    }
+			});
+			$('.container .bg').mousemove(function(e){
+			    var amountMovedX = (e.pageX * -1 / 30);
+			    var amountMovedY = (e.pageY * -1 / 9);
+			    $(this).css('background-position', amountMovedX + 'px ' + amountMovedY + 'px');
+			});
+			
+			//아이디 중복검사
+			$('#validation').click(function () {
+				let inputData = {id:$(".joinid").val()}
+				if($(".joinname").val() ==""){
+					alert('아이디를 입력 후 사용해주세요.');
+					return;
+				}
+				$.ajax({
+					url:"http://localhost:8090/boardPrj/join/validation.jsp",
+					datatype:"json",
+					type:"post",
+					data:inputData
+				}).done(function (json) {
+					let flag = Number(json.result);
+					switch(flag){
+						case EXISTID:{
+							alert('존재하는 아이디 입니다. 다른아이디를 사용해주세요.');
+							$("#validationResult").val(EXISTID);
+							break;
+						}
+						case AVAILABLEID :{
+							alert('사용가능한 아이디 입니다.');
+							$("#validationResult").val(AVAILABLEID);
+						}
+					}//end switch
+				})//done
+			})
+			
+			//회원가입 버튼이 눌렸을 경우 유효성 검사 후 회원가입
+			$('.joinsubmit').click(function () {
+				let validation = $("#validationResult").val();
+				//회원가입에 필요한 값들이 전부 입력되었는지 확인
+				if($(".joinid").val() =="" || $(".joinname").val()==""||$(".joinpassword").val()==""){
+					alert('회원가입에 필요한 정보들을 전부 입력해주세요!');
+				//아이디 중복체크를 했는지 확인
+				}else if(validation === ""){
+					alert("아이디 중복체크를 해주세요.");
+				//사용가능한 아이디 인지 확인
+				}else if(validation == EXISTID){
+					alert('존재하는 아이디 입니다. 다른아이디를 사용해주세요.');
+				//회원가입 조건이 충족시 form sublit
+				}else{
+					$(".joinForm").submit();
+				}//end else
+			})
+		</script>
+	</body>
+</html>
